@@ -616,7 +616,7 @@ def render_photo_gallery(photos: List[Dict], topic: str):
     for i, photo in enumerate(photos[:3]):
         with cols[i % 3]:
             # Photo display
-            st.image(photo['download_url'], use_column_width=True)
+            st.image(photo['download_url']) #use_column_width=True)
             
             # Photo details
             st.markdown(f"""
@@ -630,7 +630,7 @@ def render_photo_gallery(photos: List[Dict], topic: str):
                 <div style="font-size: 0.75rem; color: #94a3b8;">
                     📷 by <a href="{photo.get('photographer_url', '#')}" target="_blank" style="color: #3b82f6;">{photo.get('photographer', 'Unknown')}</a>
                     {' (Demo)' if photo.get('demo_mode') else ''}
-                </div>
+                
             </div>
             """, unsafe_allow_html=True)
             
@@ -2299,3 +2299,4 @@ if __name__ == "__main__":
     
     # Run main app
     main()
+
