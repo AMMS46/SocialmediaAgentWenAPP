@@ -601,11 +601,7 @@ def parse_generated_content(content: str) -> Tuple[List[Dict], List[Dict]]:
 def render_photo_gallery(photos: List[Dict], topic: str):
     """Render photo gallery for a topic"""
     if not photos:
-        st.markdown("""
-        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 1rem; margin: 0.5rem 0;">
-            <p style="color: #92400e; margin: 0;">📷 No photos found for this topic</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.warning("📷 No photos found for this topic")
         return
     
     st.markdown(f"**📸 Recommended Photos for '{topic}':**")
@@ -616,21 +612,28 @@ def render_photo_gallery(photos: List[Dict], topic: str):
     for i, photo in enumerate(photos[:3]):
         with cols[i % 3]:
             # Photo display
-            st.image(photo['download_url']) #use_column_width=True)
+            st.image(photo['download_url'])
             
-            # Photo details
+            # Photo details with theme-compatible styling
             st.markdown(f"""
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem; margin-top: 0.5rem;">
-                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem;">
+            <div style="
+                background-color: var(--background-color);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 0.75rem;
+                margin-top: 0.5rem;
+                color: var(--text-color);
+            ">
+                <div style="font-size: 0.8rem; margin-bottom: 0.5rem;">
                     <strong>Platform:</strong> {photo.get('platform_recommendation', 'Both')}
                 </div>
-                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem;">
+                <div style="font-size: 0.8rem; margin-bottom: 0.5rem;">
                     <strong>Description:</strong> {photo.get('description', 'Stock photo')}
                 </div>
-                <div style="font-size: 0.75rem; color: #94a3b8;">
-                    📷 by <a href="{photo.get('photographer_url', '#')}" target="_blank" style="color: #3b82f6;">{photo.get('photographer', 'Unknown')}</a>
+                <div style="font-size: 0.75rem;">
+                    📷 by <a href="{photo.get('photographer_url', '#')}" target="_blank">{photo.get('photographer', 'Unknown')}</a>
                     {' (Demo)' if photo.get('demo_mode') else ''}
-                
+                </div>
             </div>
             """, unsafe_allow_html=True)
             
@@ -640,99 +643,32 @@ def render_photo_gallery(photos: List[Dict], topic: str):
                 st.success("📋 URL ready to copy!")
 
 def render_post_card_with_photos(post: Dict, platform: str, post_number: int, photos: List[Dict] = None):
-    """Render individual post card with photos"""
+    """Render individual post card with photos - dark mode compatible"""
     
     if platform == "instagram":
-        gradient = "linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%)"
-        border_color = "#ff6b6b"
-        badge_bg = "linear-gradient(135deg, #ff6b6b, #feca57)"
         badge_icon = "📸"
         badge_text = "Instagram"
-        topic_color = "#ff6b6b"
-        content_bg = "linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%)"
-        content_border = "#feb2b2"
+        platform_class = "instagram-card"
     else:  # linkedin
-        gradient = "linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)"
-        border_color = "#667eea"
-        badge_bg = "linear-gradient(135deg, #667eea, #764ba2)"
         badge_icon = "💼"
         badge_text = "LinkedIn"
-        topic_color = "#667eea"
-        content_bg = "linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%)"
-        content_border = "#c7d2fe"
+        platform_class = "linkedin-card"
     
     st.markdown(f"""
-    <div style="
-        background: {gradient};
-        border-radius: 20px;
-        padding: 2rem;
-        border: 3px solid {border_color};
-        box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
-        transition: all 0.4s ease;
-        margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
-    ">
-        <div style="
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: {gradient};
-            animation: rainbow 4s linear infinite;
-        "></div>
-        <div style="
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 16px;
-            padding: 1.5rem;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        ">
-            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                <span style="
-                    display: inline-block;
-                    padding: 0.5rem 1rem;
-                    border-radius: 25px;
-                    font-size: 0.8rem;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    background: {badge_bg};
-                    color: white;
-                    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-                    animation: pulse 2s infinite;
-                ">{badge_icon} {badge_text}</span>
-                <span style="margin-left: auto; font-weight: 700; color: {topic_color}; font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">Post {post_number}</span>
+    <div class="post-card {platform_class}">
+        <div class="post-card-content">
+            <div class="post-header">
+                <span class="platform-badge {platform}-badge">
+                    {badge_icon} {badge_text}
+                </span>
+                <span class="post-number">Post {post_number}</span>
             </div>
-            <p style="color: #2d3748; margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600;">
-                <strong style="color: {topic_color};">🎯 Topic:</strong> {post['topic']}
-            </p>
-            <div style="
-                background: {content_bg};
-                padding: 1.5rem;
-                border-radius: 15px;
-                border: 2px solid {content_border};
-                line-height: 1.7;
-                margin-top: 1rem;
-                box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-                position: relative;
-                color: #2d3748;
-                white-space: pre-wrap;
-            ">
-                <div style="
-                    position: absolute;
-                    top: -8px;
-                    left: 20px;
-                    background: {badge_bg};
-                    color: white;
-                    padding: 0.25rem 0.75rem;
-                    border-radius: 12px;
-                    font-size: 0.7rem;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                ">Content</div>
-                {post['content']}
+            <div class="topic-info">
+                <strong>🎯 Topic:</strong> {post['topic']}
+            </div>
+            <div class="content-area">
+                <div class="content-label">Content</div>
+                <div class="content-text">{post['content']}</div>
             </div>
         </div>
     </div>
@@ -828,7 +764,7 @@ def create_content_crew_improved(sheets_data: str, config: Dict) -> Optional[str
         raise e
 
 def render_generated_content_preview_with_photos(content: str, context: str = "default"):
-    """Enhanced content preview with photos"""
+    """Enhanced content preview with photos - dark mode compatible"""
     if not content:
         st.warning("No content to display")
         return
@@ -871,13 +807,7 @@ def render_generated_content_preview_with_photos(content: str, context: str = "d
     
     # Display Instagram posts with photos
     if instagram_posts:
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%); border: 3px solid #ff6b6b; border-radius: 20px; padding: 2.5rem; margin: 2rem 0; box-shadow: 0 15px 35px rgba(255, 107, 107, 0.25); position: relative; overflow: hidden;">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 8px; background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff); animation: rainbow 4s linear infinite;"></div>
-            <h2 style="color: white; margin-bottom: 1.5rem; text-align: center; font-size: 2.5rem; font-weight: 800; text-shadow: 0 4px 8px rgba(0,0,0,0.3); position: relative; z-index: 2;">📸 Instagram Posts</h2>
-            <p style="color: rgba(255,255,255,0.9); text-align: center; font-size: 1.1rem; margin: 0; position: relative; z-index: 2;">Vibrant social media content for your Instagram audience</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="platform-header instagram-header"><h2>📸 Instagram Posts</h2><p>Vibrant social media content for your Instagram audience</p></div>', unsafe_allow_html=True)
         
         for i, post in enumerate(instagram_posts, 1):
             photos = topic_photos.get(post['topic'], [])
@@ -890,13 +820,7 @@ def render_generated_content_preview_with_photos(content: str, context: str = "d
     
     # Display LinkedIn posts with photos
     if linkedin_posts:
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%); border: 3px solid #667eea; border-radius: 20px; padding: 2.5rem; margin: 2rem 0; box-shadow: 0 15px 35px rgba(102, 126, 234, 0.25); position: relative; overflow: hidden;">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 8px; background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe); animation: rainbow 4s linear infinite;"></div>
-            <h2 style="color: white; margin-bottom: 1.5rem; text-align: center; font-size: 2.5rem; font-weight: 800; text-shadow: 0 4px 8px rgba(0,0,0,0.3); position: relative; z-index: 2;">💼 LinkedIn Posts</h2>
-            <p style="color: rgba(255,255,255,0.9); text-align: center; font-size: 1.1rem; margin: 0; position: relative; z-index: 2;">Professional content for your LinkedIn network</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="platform-header linkedin-header"><h2>💼 LinkedIn Posts</h2><p>Professional content for your LinkedIn network</p></div>', unsafe_allow_html=True)
         
         for i, post in enumerate(linkedin_posts, 1):
             photos = topic_photos.get(post['topic'], [])
@@ -928,43 +852,51 @@ def render_generated_content_preview_with_photos(content: str, context: str = "d
     
     # Raw content option (always available)
     with st.expander("📄 View Raw Content", expanded=False):
-        st.markdown("""
-        <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; border: 1px solid #e2e8f0;">
-            <h4 style="margin-bottom: 1rem; color: #374151;">Raw Generated Content</h4>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("#### Raw Generated Content")
         unique_key = f"raw_content_{context}_{hash_string(content)[:8]}_{int(time.time())}"
         st.text_area("", content, height=300, key=unique_key)
 
 # ============================================================================
-# UI COMPONENTS
+# UI COMPONENTS WITH DARK MODE SUPPORT
 # ============================================================================
 
 def render_header():
-    """Render the main header with enhanced styling"""
+    """Render the main header with dark mode compatible styling"""
     st.markdown("""
     <style>
+    /* Import Google Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
-    /* Make the whole page background white */
-    .main .block-container {
-        background-color: white !important;
+    /* CSS Variables for theme compatibility */
+    :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --error-color: #ef4444;
+        --instagram-color: #ff6b6b;
+        --linkedin-color: #667eea;
     }
     
-    .stApp {
-        background-color: white !important;
+    /* Dark mode CSS variables - Streamlit automatically applies these */
+    [data-theme="dark"] {
+        --text-color: #ffffff;
+        --background-color: #0e1117;
+        --secondary-background: #262730;
+        --border-color: #30363d;
+        --card-background: #1a1d24;
     }
     
-    /* Ensure all main containers have white background */
-    .main {
-        background-color: white !important;
+    /* Light mode CSS variables */
+    [data-theme="light"], :root {
+        --text-color: #1e293b;
+        --background-color: #ffffff;
+        --secondary-background: #f8fafc;
+        --border-color: #e2e8f0;
+        --card-background: #ffffff;
     }
     
-    /* Fix any remaining background issues */
-    .stMarkdown {
-        background-color: white !important;
-    }
-    
+    /* Main header styling */
     .main-header {
         text-align: center;
         padding: 3rem 0;
@@ -1027,13 +959,15 @@ def render_header():
         50% { transform: translateY(-10px); }
     }
     
+    /* Enhanced metrics with theme support */
     .enhanced-metric {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        background-color: var(--card-background);
         border-radius: 15px;
         padding: 1.5rem;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border-color);
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         transition: all 0.3s ease;
+        color: var(--text-color);
     }
     
     .enhanced-metric:hover {
@@ -1044,18 +978,20 @@ def render_header():
     .metric-value {
         font-size: 2rem;
         font-weight: 700;
-        color: #1e293b;
+        color: var(--text-color);
         margin-bottom: 0.5rem;
     }
     
     .metric-label {
         font-size: 0.9rem;
-        color: #64748b;
+        color: var(--text-color);
+        opacity: 0.7;
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     
+    /* Status indicators */
     .status-indicator {
         display: inline-block;
         width: 12px;
@@ -1065,9 +1001,9 @@ def render_header():
         animation: pulse 2s infinite;
     }
     
-    .status-success { background-color: #10b981; }
-    .status-warning { background-color: #f59e0b; }
-    .status-error { background-color: #ef4444; }
+    .status-success { background-color: var(--success-color); }
+    .status-warning { background-color: var(--warning-color); }
+    .status-error { background-color: var(--error-color); }
     
     @keyframes pulse {
         0% { opacity: 1; }
@@ -1075,21 +1011,151 @@ def render_header():
         100% { opacity: 1; }
     }
     
-    @keyframes rainbow {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    /* Platform headers */
+    .platform-header {
+        text-align: center;
+        padding: 2rem;
+        border-radius: 20px;
+        margin: 2rem 0;
+        position: relative;
+        overflow: hidden;
     }
     
-    /* All other CSS styles remain the same */
-    .enhanced-card {
-        background: white;
+    .instagram-header {
+        background: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%);
+    }
+    
+    .linkedin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+    }
+    
+    .platform-header h2 {
+        color: white;
+        margin-bottom: 0.5rem;
+        font-size: 2.5rem;
+        font-weight: 800;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    
+    .platform-header p {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    /* Post cards with theme support */
+    .post-card {
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s ease;
+    }
+    
+    .instagram-card {
+        background: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%);
+        border: 3px solid var(--instagram-color);
+        box-shadow: 0 12px 30px rgba(255, 107, 107, 0.3);
+    }
+    
+    .linkedin-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+        border: 3px solid var(--linkedin-color);
+        box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .post-card-content {
+        background: rgba(255, 255, 255, 0.95);
         border-radius: 16px;
         padding: 1.5rem;
-        border: 1px solid #e2e8f0;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #1e293b;
+    }
+    
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .platform-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        animation: pulse 2s infinite;
+    }
+    
+    .instagram-badge {
+        background: linear-gradient(135deg, #ff6b6b, #feca57);
+    }
+    
+    .linkedin-badge {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    
+    .post-number {
+        margin-left: auto;
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .topic-info {
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+    
+    .content-area {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        border: 2px solid #cbd5e1;
+        line-height: 1.7;
+        margin-top: 1rem;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        position: relative;
+        color: #2d3748;
+        white-space: pre-wrap;
+    }
+    
+    .content-label {
+        position: absolute;
+        top: -8px;
+        left: 20px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .content-text {
+        margin-top: 0.5rem;
+    }
+    
+    /* Enhanced cards with theme support */
+    .enhanced-card {
+        background-color: var(--card-background);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         transition: all 0.3s ease;
         margin-bottom: 1rem;
+        color: var(--text-color);
     }
     
     .enhanced-card:hover {
@@ -1097,55 +1163,155 @@ def render_header():
         box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     }
     
-    /* Add all the existing CSS styles from your original file */
-    .form-label {
-        color: #1e293b !important;
-        font-weight: 600 !important;
-        font-size: 0.95rem !important;
-        margin-bottom: 0.5rem !important;
+    /* Notification boxes with theme support */
+    .notification-box {
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border-width: 1px;
+        border-style: solid;
     }
     
-    .form-description {
-        color: #64748b !important;
-        font-size: 0.85rem !important;
-        margin-top: 0.25rem !important;
+    .notification-success {
+        background-color: rgba(16, 185, 129, 0.1);
+        border-color: var(--success-color);
+        color: var(--text-color);
     }
     
-    /* Button styling */
-    .stButton button {
+    .notification-warning {
+        background-color: rgba(245, 158, 11, 0.1);
+        border-color: var(--warning-color);
+        color: var(--text-color);
+    }
+    
+    .notification-error {
+        background-color: rgba(239, 68, 68, 0.1);
+        border-color: var(--error-color);
+        color: var(--text-color);
+    }
+    
+    .notification-info {
+        background-color: rgba(59, 130, 246, 0.1);
+        border-color: #3b82f6;
+        color: var(--text-color);
+    }
+    
+    .notification-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .notification-content {
+        margin: 0;
+    }
+    
+    /* Remove forced colors and use theme-aware colors */
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
+        color: var(--text-color) !important;
+    }
+    
+    .stMarkdown p {
+        color: var(--text-color) !important;
+    }
+    
+    /* Button styling that respects theme */
+    .stButton > button {
+        background-color: var(--primary-color) !important;
         color: white !important;
-        background-color: #667eea !important;
         border: none !important;
         border-radius: 8px !important;
-        padding: 0.5rem 1rem !important;
         font-weight: 600 !important;
+        transition: all 0.3s ease !important;
     }
     
-    .stButton button:hover {
+    .stButton > button:hover {
         background-color: #5a67d8 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    }
+    
+    /* Form elements that adapt to theme */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea,
+    .stSelectbox > div > div > div {
+        background-color: var(--background-color) !important;
+        color: var(--text-color) !important;
+        border-color: var(--border-color) !important;
+    }
+    
+    /* Checkbox and radio button styling */
+    .stCheckbox > label,
+    .stRadio > div > label {
+        color: var(--text-color) !important;
+    }
+    
+    /* Metric styling */
+    [data-testid="metric-container"] {
+        background-color: var(--card-background);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem;
+    }
+    
+    [data-testid="metric-container"] > div {
+        color: var(--text-color) !important;
+    }
+    
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        color: var(--text-color) !important;
+        background-color: var(--card-background) !important;
+        border-color: var(--border-color) !important;
+    }
+    
+    /* Dataframe styling */
+    .dataframe {
+        background-color: var(--card-background) !important;
+        color: var(--text-color) !important;
+    }
+    
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: var(--background-color);
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        color: var(--text-color) !important;
+    }
+    
+    /* Info/warning/error boxes */
+    .stAlert {
+        background-color: var(--card-background) !important;
+        color: var(--text-color) !important;
+        border-color: var(--border-color) !important;
+    }
+    
+    /* Download button styling */
+    .stDownloadButton > button {
+        background-color: var(--secondary-color) !important;
         color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
     }
     
-    /* Text input and area styling */
-    .stTextInput input, .stTextArea textarea {
-        color: #1e293b !important;
-        background-color: #f8fafc !important;
-        border: 1px solid #e2e8f0 !important;
+    /* Code block styling */
+    .stCode {
+        background-color: var(--secondary-background) !important;
+        color: var(--text-color) !important;
+        border-color: var(--border-color) !important;
     }
     
-    .stTextArea textarea:disabled {
-        color: #1e293b !important;
-        background-color: #f1f5f9 !important;
-        border: 1px solid #cbd5e1 !important;
+    /* Sidebar styling */
+    .css-1d391kg {
+        background-color: var(--background-color) !important;
     }
     
-    /* Radio button styling */
-    .stRadio > div > div > div > label {
-        color: #1e293b !important;
-        font-weight: 500 !important;
+    /* Animation for rainbow effect */
+    @keyframes rainbow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
-    
-    /* All other existing styles... */
     </style>
     
     <div class="main-header">
@@ -1156,7 +1322,7 @@ def render_header():
     """, unsafe_allow_html=True)
 
 def render_status_metrics():
-    """Render status metrics with enhanced styling including photo search"""
+    """Render status metrics with theme-compatible styling"""
     api_status = validate_api_keys()
     
     col1, col2, col3, col4, col5 = st.columns(5)
@@ -1223,15 +1389,15 @@ def render_content_generation_tab():
     sheets_data = safe_get_session_state('sheets_data', None)
     if not sheets_data:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-            <h4 style="color: #92400e; margin-bottom: 0.5rem;">⚠️ No Data Available</h4>
-            <p style="color: #92400e; margin-bottom: 0;">Please add data in the 'Data Source' tab first.</p>
+        <div class="notification-box notification-warning">
+            <div class="notification-title">⚠️ No Data Available</div>
+            <div class="notification-content">Please add data in the 'Data Source' tab first.</div>
         </div>
         """, unsafe_allow_html=True)
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 1px solid #3b82f6; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-            <h4 style="color: #1e40af; margin-bottom: 0.5rem;">💡 Quick Start</h4>
-            <p style="color: #1e40af; margin-bottom: 0;">Go to the 'Data Source' tab and click 'Load Sample Data' to test the app!</p>
+        <div class="notification-box notification-info">
+            <div class="notification-title">💡 Quick Start</div>
+            <div class="notification-content">Go to the 'Data Source' tab and click 'Load Sample Data' to test the app!</div>
         </div>
         """, unsafe_allow_html=True)
         return
@@ -1240,24 +1406,20 @@ def render_content_generation_tab():
     with st.expander("📊 Current Data Preview", expanded=False):
         st.text_area("Your topics and keywords:", sheets_data, height=150, disabled=True)
     
-    # Configuration form with enhanced styling
-    st.markdown("""
-    <div style="background: white; border-radius: 16px; padding: 2rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin: 1rem 0;">
-        <h3 style="color: #1e293b; margin-bottom: 1.5rem; font-weight: 600;">📋 Content & Photo Settings</h3>
-    </div>
-    """, unsafe_allow_html=True)
+    # Configuration form
+    st.markdown('<div class="enhanced-card"><h3>📋 Content & Photo Settings</h3></div>', unsafe_allow_html=True)
     
     with st.form("improved_content_config"):
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown('<p class="form-label">Instagram Captions per Topic</p>', unsafe_allow_html=True)
+            st.markdown("**Instagram Captions per Topic**")
             num_instagram = st.slider("", 1, 5, 1, key="instagram_slider")
-            st.markdown('<p class="form-label">LinkedIn Captions per Topic</p>', unsafe_allow_html=True)
+            st.markdown("**LinkedIn Captions per Topic**")
             num_linkedin = st.slider("", 1, 5, 1, key="linkedin_slider")
             
         with col2:
-            st.markdown('<p class="form-label">Content Tone</p>', unsafe_allow_html=True)
+            st.markdown("**Content Tone**")
             tone = st.selectbox("", ["Professional", "Casual", "Friendly", "Authoritative"], key="tone_select")
             col_a, col_b = st.columns(2)
             with col_a:
@@ -1266,7 +1428,7 @@ def render_content_generation_tab():
                 include_emojis = st.checkbox("Include Emojis", value=True, key="emojis_check")
         
         # Photo settings
-        st.markdown('<p class="form-label">📸 Photo Settings</p>', unsafe_allow_html=True)
+        st.markdown("**📸 Photo Settings**")
         col_c, col_d = st.columns(2)
         with col_c:
             include_photos = st.checkbox("Search for stock photos", value=True, key="photos_check")
@@ -1276,12 +1438,8 @@ def render_content_generation_tab():
             else:
                 photos_per_topic = 0
         
-        # Enhanced submit button
-        st.markdown("""
-        <div style="text-align: center; margin: 2rem 0;">
-        """, unsafe_allow_html=True)
+        # Submit button
         submitted = st.form_submit_button("🚀 Generate Content & Photos", type="primary", use_container_width=True)
-        st.markdown("</div>", unsafe_allow_html=True)
         
         if submitted:
             config = {
@@ -1297,9 +1455,8 @@ def render_content_generation_tab():
             # Show generation progress
             progress_placeholder = st.empty()
             progress_placeholder.markdown("""
-            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #0ea5e9; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                <h4 style="color: #0c4a6e; margin-bottom: 0.5rem;">🤖 AI is generating your content...</h4>
-                <div class="progress-bar"></div>
+            <div class="notification-box notification-info">
+                <div class="notification-title">🤖 AI is generating your content...</div>
             </div>
             """, unsafe_allow_html=True)
             
@@ -1316,9 +1473,8 @@ def render_content_generation_tab():
                     # Generate photos if requested
                     if include_photos:
                         progress_placeholder.markdown("""
-                        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #0ea5e9; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                            <h4 style="color: #0c4a6e; margin-bottom: 0.5rem;">📸 Searching for relevant photos...</h4>
-                            <div class="progress-bar"></div>
+                        <div class="notification-box notification-info">
+                            <div class="notification-title">📸 Searching for relevant photos...</div>
                         </div>
                         """, unsafe_allow_html=True)
                         
@@ -1328,23 +1484,23 @@ def render_content_generation_tab():
                             total_photos = sum(len(photos) for photos in topic_photos.values())
                             
                             progress_placeholder.markdown(f"""
-                            <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 1px solid #16a34a; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                                <h4 style="color: #15803d; margin-bottom: 0.5rem;">✅ Content and photos generated successfully!</h4>
-                                <p style="color: #15803d; margin-bottom: 0;">📸 Found {total_photos} stock photos across {len(topic_photos)} topics</p>
+                            <div class="notification-box notification-success">
+                                <div class="notification-title">✅ Content and photos generated successfully!</div>
+                                <div class="notification-content">📸 Found {total_photos} stock photos across {len(topic_photos)} topics</div>
                             </div>
                             """, unsafe_allow_html=True)
                         except Exception as photo_error:
                             logger.error(f"Photo search error: {photo_error}")
                             progress_placeholder.markdown("""
-                            <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 1px solid #16a34a; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                                <h4 style="color: #15803d; margin-bottom: 0.5rem;">✅ Content generated successfully!</h4>
-                                <p style="color: #92400e; margin-bottom: 0;">⚠️ Photo search failed, but content is ready</p>
+                            <div class="notification-box notification-success">
+                                <div class="notification-title">✅ Content generated successfully!</div>
+                                <div class="notification-content">⚠️ Photo search failed, but content is ready</div>
                             </div>
                             """, unsafe_allow_html=True)
                     else:
                         progress_placeholder.markdown("""
-                        <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 1px solid #16a34a; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                            <h4 style="color: #15803d; margin-bottom: 0;">✅ Content generated successfully!</h4>
+                        <div class="notification-box notification-success">
+                            <div class="notification-title">✅ Content generated successfully!</div>
                         </div>
                         """, unsafe_allow_html=True)
                     
@@ -1352,7 +1508,7 @@ def render_content_generation_tab():
                     with st.expander("📝 Preview Generated Content & Photos", expanded=True):
                         render_generated_content_preview_with_photos(result, "generation")
                     
-                    # Enhanced download options
+                    # Download options
                     col_dl1, col_dl2 = st.columns(2)
                     with col_dl1:
                         st.download_button(
@@ -1381,17 +1537,17 @@ def render_content_generation_tab():
                 else:
                     progress_placeholder.empty()
                     st.markdown("""
-                    <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 1px solid #dc2626; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                        <h4 style="color: #991b1b; margin-bottom: 0;">❌ Failed to generate content. Please try again.</h4>
+                    <div class="notification-box notification-error">
+                        <div class="notification-title">❌ Failed to generate content. Please try again.</div>
                     </div>
                     """, unsafe_allow_html=True)
                     
             except Exception as e:
                 progress_placeholder.empty()
                 st.markdown(f"""
-                <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 1px solid #dc2626; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                    <h4 style="color: #991b1b; margin-bottom: 0.5rem;">❌ Error generating content</h4>
-                    <p style="color: #991b1b; margin-bottom: 0;">{str(e)}</p>
+                <div class="notification-box notification-error">
+                    <div class="notification-title">❌ Error generating content</div>
+                    <div class="notification-content">{str(e)}</div>
                 </div>
                 """, unsafe_allow_html=True)
                 logger.error(f"Content generation error: {e}")
@@ -1438,32 +1594,27 @@ def create_comprehensive_output_with_photos(content: str, topic_photos: Dict, sh
     return output
 
 def render_data_source_tab():
-    """Render the data source tab with enhanced styling"""
+    """Render the data source tab with dark mode compatible styling"""
     st.markdown("### 📊 Data Source Configuration")
     
-    # Enhanced data input method selection
-    st.markdown("""
-    <div style="background: white; border-radius: 16px; padding: 2rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin: 1rem 0;">
-        <h3 style="color: #1e293b; margin-bottom: 1.5rem; font-weight: 600;">Choose Data Source</h3>
-    </div>
-    """, unsafe_allow_html=True)
+    # Data input method selection
+    st.markdown('<div class="enhanced-card"><h3>Choose Data Source</h3></div>', unsafe_allow_html=True)
     
-    st.markdown('<p class="form-label">Choose data source:</p>', unsafe_allow_html=True)
     data_method = st.radio(
-        "",
+        "Choose data source:",
         ["Google Sheets URL", "Manual Input", "Sample Data"],
         horizontal=True
     )
     
     if data_method == "Google Sheets URL":
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #0ea5e9; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-            <h4 style="color: #0c4a6e; margin-bottom: 1rem;">🔗 Google Sheets Integration</h4>
+        <div class="notification-box notification-info">
+            <div class="notification-title">🔗 Google Sheets Integration</div>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown('<p class="form-label">Google Sheets URL:</p>', unsafe_allow_html=True)
-        st.markdown('<p class="form-description">Make sure your sheet has \'Topic\' and \'Keywords\' columns</p>', unsafe_allow_html=True)
+        st.markdown("**Google Sheets URL:**")
+        st.caption("Make sure your sheet has 'Topic' and 'Keywords' columns")
         sheet_url = st.text_input(
             "",
             placeholder="https://docs.google.com/spreadsheets/d/...",
@@ -1479,62 +1630,50 @@ def render_data_source_tab():
                         safe_set_session_state('sheets_data', result)
                         safe_set_session_state('dataframe', df)
                         st.markdown("""
-                        <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 1px solid #16a34a; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                            <h4 style="color: #15803d; margin-bottom: 0;">✅ Data loaded successfully!</h4>
+                        <div class="notification-box notification-success">
+                            <div class="notification-title">✅ Data loaded successfully!</div>
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        # Display data with enhanced styling
-                        st.markdown("""
-                        <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; margin: 1rem 0;">
-                            <h4 style="color: #1e293b; margin-bottom: 1rem;">📋 Loaded Data</h4>
-                        </div>
-                        """, unsafe_allow_html=True)
+                        # Display data
+                        st.markdown('<div class="enhanced-card"><h4>📋 Loaded Data</h4></div>', unsafe_allow_html=True)
                         st.dataframe(df, use_container_width=True)
                     else:
                         st.markdown(f"""
-                        <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 1px solid #dc2626; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                            <h4 style="color: #991b1b; margin-bottom: 0;">❌ Error</h4>
-                            <p style="color: #991b1b; margin-bottom: 0;">{result}</p>
+                        <div class="notification-box notification-error">
+                            <div class="notification-title">❌ Error</div>
+                            <div class="notification-content">{result}</div>
                         </div>
                         """, unsafe_allow_html=True)
             else:
                 st.markdown("""
-                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                    <h4 style="color: #92400e; margin-bottom: 0;">⚠️ Please enter a Google Sheets URL</h4>
+                <div class="notification-box notification-warning">
+                    <div class="notification-title">⚠️ Please enter a Google Sheets URL</div>
                 </div>
                 """, unsafe_allow_html=True)
     
     elif data_method == "Manual Input":
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-            <h4 style="color: #92400e; margin-bottom: 1rem;">✏️ Manual Data Entry</h4>
+        <div class="notification-box notification-warning">
+            <div class="notification-title">✏️ Manual Data Entry</div>
         </div>
         """, unsafe_allow_html=True)
         
-        # Manual input form with enhanced styling
+        # Manual input form
         with st.form("manual_data"):
-            st.markdown("""
-            <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; margin: 1rem 0;">
-                <h4 style="color: #1e293b; margin-bottom: 1rem;">Enter Your Topics and Keywords</h4>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown('<div class="enhanced-card"><h4>Enter Your Topics and Keywords</h4></div>', unsafe_allow_html=True)
             
             topics = []
             keywords = []
             
             for i in range(3):  # Allow up to 3 topics
-                st.markdown(f"""
-                <div style="background: #f8fafc; border-radius: 8px; padding: 1rem; margin: 1rem 0; border: 1px solid #e2e8f0;">
-                    <h5 style="color: #374151; margin-bottom: 1rem;">Topic {i+1}</h5>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(f"**Topic {i+1}**")
                 col1, col2 = st.columns(2)
                 with col1:
-                    st.markdown('<p class="form-label">Topic</p>', unsafe_allow_html=True)
+                    st.markdown("**Topic**")
                     topic = st.text_input("", key=f"topic_{i}", placeholder="Enter topic...")
                 with col2:
-                    st.markdown('<p class="form-label">Keywords</p>', unsafe_allow_html=True)
+                    st.markdown("**Keywords**")
                     keyword = st.text_input("", key=f"keyword_{i}", placeholder="Enter keywords...")
                 
                 if topic and keyword:
@@ -1544,8 +1683,8 @@ def render_data_source_tab():
                         keywords.append(keyword)
                     else:
                         st.markdown(f"""
-                        <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 1px solid #dc2626; border-radius: 8px; padding: 1rem; margin: 0.5rem 0;">
-                            <p style="color: #991b1b; margin-bottom: 0;">Topic {i+1}: {error_msg}</p>
+                        <div class="notification-box notification-error">
+                            <div class="notification-content">Topic {i+1}: {error_msg}</div>
                         </div>
                         """, unsafe_allow_html=True)
             
@@ -1558,22 +1697,22 @@ def render_data_source_tab():
                     
                     safe_set_session_state('sheets_data', result)
                     st.markdown("""
-                    <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 1px solid #16a34a; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                        <h4 style="color: #15803d; margin-bottom: 0;">✅ Manual data saved!</h4>
+                    <div class="notification-box notification-success">
+                        <div class="notification-title">✅ Manual data saved!</div>
                     </div>
                     """, unsafe_allow_html=True)
                 else:
                     st.markdown("""
-                    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                        <h4 style="color: #92400e; margin-bottom: 0;">⚠️ Please enter at least one valid topic and keywords</h4>
+                    <div class="notification-box notification-warning">
+                        <div class="notification-title">⚠️ Please enter at least one valid topic and keywords</div>
                     </div>
                     """, unsafe_allow_html=True)
     
     else:  # Sample Data
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 1px solid #3b82f6; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-            <h4 style="color: #1e40af; margin-bottom: 1rem;">📝 Sample Data</h4>
-            <p style="color: #1e40af; margin-bottom: 0;">Click the button below to load sample data for testing</p>
+        <div class="notification-box notification-info">
+            <div class="notification-title">📝 Sample Data</div>
+            <div class="notification-content">Click the button below to load sample data for testing</div>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1590,26 +1729,22 @@ Keywords: ecommerce, online shopping, digital marketing, customer experience
 
 """
         
-        # Display sample data preview with enhanced styling
-        st.markdown("""
-        <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; margin: 1rem 0;">
-            <h4 style="color: #1e293b; margin-bottom: 1rem;">Sample Data Preview</h4>
-        </div>
-        """, unsafe_allow_html=True)
+        # Display sample data preview
+        st.markdown('<div class="enhanced-card"><h4>Sample Data Preview</h4></div>', unsafe_allow_html=True)
         st.text_area("", sample_data, height=200, disabled=True, key="sample_preview")
         
-        # Enhanced button to load sample data
+        # Button to load sample data
         if st.button("📥 Load Sample Data", type="primary", use_container_width=True):
             safe_set_session_state('sheets_data', sample_data)
             st.markdown("""
-            <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 1px solid #16a34a; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                <h4 style="color: #15803d; margin-bottom: 0.5rem;">✅ Sample data loaded successfully!</h4>
-                <p style="color: #15803d; margin-bottom: 0;">💡 Now go to the 'Generate Content' tab to create your social media posts with photos!</p>
+            <div class="notification-box notification-success">
+                <div class="notification-title">✅ Sample data loaded successfully!</div>
+                <div class="notification-content">💡 Now go to the 'Generate Content' tab to create your social media posts with photos!</div>
             </div>
             """, unsafe_allow_html=True)
 
 def render_posting_tab():
-    """Enhanced posting tab with photo integration"""
+    """Enhanced posting tab with photo integration and dark mode support"""
     st.markdown("### 📱 Social Media Posting with Photos")
     
     if not safe_get_session_state('content_generated', False):
@@ -1809,7 +1944,7 @@ def render_posting_tab():
                 logger.error(f"Posting error: {e}")
 
 def render_results_tab():
-    """Enhanced results tab with photo integration"""
+    """Enhanced results tab with photo integration and dark mode support"""
     st.markdown("### 📋 Results & History")
     
     # Generated content
@@ -1946,7 +2081,7 @@ def render_results_tab():
             )
 
 def render_analytics_tab():
-    """Enhanced analytics tab with photo metrics"""
+    """Enhanced analytics tab with photo metrics and dark mode support"""
     st.markdown("### 📊 Analytics & Insights")
     
     # Content generation analytics
@@ -2047,7 +2182,7 @@ def render_analytics_tab():
             st.write(f"{status_icon} {photo_icon} **{timestamp}** - {platform}: {topic}")
 
 def render_photo_tab():
-    """New tab dedicated to photo management"""
+    """Photo management tab with dark mode support"""
     st.markdown("### 📸 Photo Gallery & Management")
     
     topic_photos = safe_get_session_state('topic_photos', {})
@@ -2137,7 +2272,7 @@ def render_photo_tab():
 # ============================================================================
 
 def main():
-    """Main application function with enhanced photo integration"""
+    """Main application function with enhanced photo integration and dark mode support"""
     try:
         # Render header
         render_header()
@@ -2150,14 +2285,14 @@ def main():
         if not llm:
             st.error("❌ Failed to initialize LLM. Please check your Gemini API key.")
             st.markdown("""
-            <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 1px solid #dc2626; border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                <h4 style="color: #991b1b; margin-bottom: 0.5rem;">🔧 Setup Required</h4>
-                <p style="color: #991b1b; margin-bottom: 0;">Add your GOOGLE_API_KEY to the .env file to use the content generation features.</p>
+            <div class="notification-box notification-error">
+                <div class="notification-title">🔧 Setup Required</div>
+                <div class="notification-content">Add your GOOGLE_API_KEY to the .env file to use the content generation features.</div>
             </div>
             """, unsafe_allow_html=True)
             return
         
-        # Main tabs - Enhanced with photo management
+        # Main tabs
         tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
             "📊 Data Source", 
             "🎯 Generate Content", 
@@ -2220,83 +2355,9 @@ def main():
                 st.write("- ❌ CrewAI library not installed (run: pip install crewai)")
 
 # ============================================================================
-# ENVIRONMENT SETUP HELPER
-# ============================================================================
-
-def show_setup_instructions():
-    """Enhanced setup instructions including Unsplash API"""
-    if 'setup_shown' not in st.session_state:
-        st.session_state.setup_shown = True
-        
-        with st.expander("🚀 First Time Setup Instructions", expanded=True):
-            st.markdown("""
-            #### Required Environment Variables
-            
-            Create a `.env` file in your project directory with:
-            
-            ```
-            # Required for content generation
-            GOOGLE_API_KEY=your_gemini_api_key_here
-            
-            # Optional for social media posting
-            BUFFER_ACCESS_TOKEN=your_buffer_token_here
-            
-            # Optional for stock photo search
-            UNSPLASH_ACCESS_KEY=your_unsplash_key_here
-            ```
-            
-            #### How to get API keys:
-            
-            1. **Gemini API Key (Required):**
-               - Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-               - Create a new API key
-               - Copy and paste it into your .env file
-            
-            2. **Buffer Access Token (Optional):**
-               - Go to [Buffer Developers](https://buffer.com/developers/api)
-               - Create an app and get your access token
-               - This enables actual social media posting
-            
-            3. **Unsplash Access Key (NEW - Optional):**
-               - Go to [Unsplash Developers](https://unsplash.com/developers)
-               - Create an app and get your access key
-               - This enables automatic stock photo search and recommendations
-               - Without this, the app will show demo photos
-            
-            #### Installation Requirements:
-            
-            ```bash
-            pip install streamlit pandas requests python-dotenv crewai
-            ```
-            
-            #### Quick Test:
-            
-            1. Add your GOOGLE_API_KEY to the .env file
-            2. (Optional) Add UNSPLASH_ACCESS_KEY for real photo search
-            3. Go to "Data Source" tab
-            4. Click "Load Sample Data"
-            5. Go to "Generate Content" tab
-            6. Enable "Search for stock photos"
-            7. Click "Generate Content & Photos"
-            8. View results in "Photo Gallery" tab
-            
-            #### New Features:
-            
-            - 📸 **Automatic photo search** for each topic
-            - 🎯 **Platform-specific photo recommendations**
-            - 📱 **Photo preview in posting interface**
-            - 📊 **Photo analytics and management**
-            - 📥 **Download content with photo URLs and attributions**
-            """)
-
-# ============================================================================
 # APP ENTRY POINT
 # ============================================================================
 
 if __name__ == "__main__":
-    # Show setup instructions for new users
-    show_setup_instructions()
-    
-    # Run main app
+    # Run main app directly (setup instructions removed)
     main()
-
