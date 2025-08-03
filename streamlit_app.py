@@ -2292,12 +2292,12 @@ def main():
             """, unsafe_allow_html=True)
             return
         
-        # Main tabs
+        # Main tabs - Photo Gallery moved before Post Content
         tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
             "📊 Data Source", 
             "🎯 Generate Content", 
-            "📱 Post Content", 
             "📸 Photo Gallery",
+            "📱 Post Content", 
             "📋 Results",
             "📈 Analytics"
         ])
@@ -2309,10 +2309,10 @@ def main():
             render_content_generation_tab()
         
         with tab3:
-            render_posting_tab()
+            render_photo_tab()
         
         with tab4:
-            render_photo_tab()
+            render_posting_tab()
         
         with tab5:
             render_results_tab()
